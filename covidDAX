@@ -1,0 +1,105 @@
+CountMeasureVal2 = 
+IF('Transaction Table'[UniqueMerchantCnt]=BLANK(),
+"No transactions for the selected sector(s)",
+    VAR HighSectorTbl =
+    SUMMARIZE('Transaction Table','Transaction Table'[TxnSector],
+    "Highest sector",'Transaction Table'[UniqueMerchantCnt]
+    )
+VAR HighSectorVal = MAXX(
+    SUMMARIZE(
+        'Transaction Table',
+       'Transaction Table'[TxnSector],
+       "Highest Sector",'Transaction Table'[UniqueMerchantCnt]
+    ),
+  [Highest Sector]
+)
+    VAR LowSectorTbl =
+    SUMMARIZE('Transaction Table','Transaction Table'[TxnSector],
+    "Lowest sector",'Transaction Table'[UniqueMerchantCnt]
+    )
+VAR LowSectorVal = MINX(
+    SUMMARIZE(
+        'Transaction Table',
+       'Clean Merchant_table'[SECTOR],
+       "Lowest Sector",'Transaction Table'[UniqueMerchantCnt]
+    ),
+  [Lowest Sector]
+)
+RETURN
+"The sector with the highest number of unique merchant count is "&CALCULATE(MAXX(FILTER(HighSectorTbl, [Highest Sector] = HighSectorVal), 'Transaction Table'[TxnSector]))
+&" at "& HighSectorVal&", while the sector with the lowest number of unique merchant is "&CALCULATE(minx(FILTER(LowSectorTbl, [Lowest Sector] = LowSectorVal), 'Transaction Table'[TxnSector]))&" at "&LowSectorVal&" merchant(s)."
+)
+//if the unique merchant count is not blank, filter the sector to determine the highest and lowest values
+
+//selecting the day with the highest or lowest values
+CountMeasureVal = 
+IF('Transaction Table'[UniqueMerchantCnt]=BLANK(),
+"No transactions for the selected sector(s)",
+"For the selected sector(s), the day with the Highest Number of Unique Merchant Count is "&
+    VAR HighTableDayTxnCnt =
+    SUMMARIZE('Transaction Table',CalendarTable[Date].[Date],
+    "Highest merchant count day",'Transaction Table'[UniqueMerchantCnt]
+    )
+VAR HighestDayTxnCnt = MAXX(
+    SUMMARIZE(
+        'Transaction Table',
+        CalendarTable[Date].[Date],
+       "Highest merchant count day",'Transaction Table'[UniqueMerchantCnt]
+    ),
+  [Highest merchant count day]
+)
+RETURN
+FORMAT(CALCULATE(FIRSTNONBLANK(CalendarTable[Date].[Date],1),
+    FILTER(HighTableDayTxnCnt,[Highest merchant count day]=HighestDayTxnCnt)),"dd/mm/yyyy")
+        &" at "&
+        FORMAT(HighestDayTxnCnt,"#,##")
+        &" Merchants, while the day with the Lowest Number of Unique Merchant Count  is "&
+    VAR LowTableDayTxnCnt = 
+    SUMMARIZE('Transaction Table',CalendarTable[Date].[Date],
+    "Lowest merchant count day",'Transaction Table'[UniqueMerchantCnt]
+    )
+VAR LowestDayTxnCnt = MINX(
+    SUMMARIZE(
+        'Transaction Table',
+        CalendarTable[Date].[Date],
+        "Lowest merchant count day",'Transaction Table'[UniqueMerchantCnt]
+    ),
+   [Lowest merchant count day]
+)
+RETURN
+FORMAT(CALCULATE(FIRSTNONBLANK(CalendarTable[Date].[Date],1),
+FILTER(LowTableDayTxnCnt,[Lowest merchant count day]=LowestDayTxnCnt)),"dd/mm/yyyy")
+&" at "&
+FORMAT(LowestDayTxnCnt,"#,##")&" merchant(s).")
+
+VolumeSumMeasure2 = 
+IF('Transaction Table'[TxnVol]=BLANK(),
+"No transactions for the selected sector(s)",
+    VAR HighSectorTbl =
+    SUMMARIZE('Transaction Table','Transaction Table'[TxnSector],
+    "Highest sector",'Transaction Table'[TxnVol]
+    )
+VAR HighSectorVal = MAXX(
+    SUMMARIZE(
+        'Transaction Table',
+       'Transaction Table'[TxnSector],
+       "Highest Sector",'Transaction Table'[TxnVol]
+    ),
+  [Highest Sector]
+)
+    VAR LowSectorTbl =
+    SUMMARIZE('Transaction Table','Transaction Table'[TxnSector],
+    "Lowest sector",'Transaction Table'[TxnVol]
+    )
+VAR LowSectorVal = MINX(
+    SUMMARIZE(
+        'Transaction Table',
+       'Transaction Table'[TxnSector],
+       "Lowest Sector",'Transaction Table'[TxnVol]
+    ),
+  [Lowest Sector]
+)
+RETURN
+"The sector with the highest number of transaction volume is "&CALCULATE(MAXX(FILTER(HighSectorTbl, [Highest Sector] = HighSectorVal), 'Transaction Table'[TxnSector]))
+&" at "& FORMAT(HighSectorVal,"#,##")&", while the sector with the lowest number of transaction volume is "&CALCULATE(minx(FILTER(LowSectorTbl, [Lowest Sector] = LowSectorVal), 'Transaction Table'[TxnSector]))&" at "&FORMAT(LowSectorVal,"#,##")&"."
+)
